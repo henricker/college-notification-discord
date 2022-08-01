@@ -99,7 +99,7 @@ export class FetchMailService extends EventEmitter {
     console.log('Marker as seen');
   }
 
-  private async handleOpenBox(err: Error, boxName: string) {
+  private async handleOpenBox(err: Error | null, boxName: string) {
     if (err) {
       throw err;
     }
