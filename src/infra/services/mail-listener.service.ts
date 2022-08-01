@@ -91,12 +91,10 @@ export class FetchMailService extends EventEmitter {
     }
   }
 
-  private async handleAddFlags(err: Error) {
+  private async handleAddFlags(err: Error | null) {
     if (err) {
       throw err;
     }
-
-    console.log('Marker as seen');
   }
 
   private async handleOpenBox(err: Error | null, boxName: string) {
