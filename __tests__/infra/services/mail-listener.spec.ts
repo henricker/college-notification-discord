@@ -111,4 +111,18 @@ describe('# Fetch Mail (service)', () => {
       jest.useRealTimers();
     });
   });
+
+  describe('handleAddFlags (method)', () => {
+    it('Should throw an error if error has been passed', () => {
+      const fetchMailService = new FetchMailService(imapConfigMock);
+      expect(
+        fetchMailService['handleAddFlags'](new Error('Error'))
+      ).rejects.toThrow();
+    });
+
+    it('Should not throw if no error has been passed', () => {
+      const fetchMailService = new FetchMailService(imapConfigMock);
+      expect(fetchMailService['handleAddFlags'](null)).resolves.not.toThrow();
+    });
+  });
 });
