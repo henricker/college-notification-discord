@@ -302,8 +302,7 @@ describe('# Fetch Mail (service)', () => {
       expect(emitSpy).toBeCalledWith('finish-read-messages', [
         {
           from: {
-            address: 'henriquevieira@alu.ufc.br',
-            name: 'Henrique Vieira'
+            address: 'henriquevieira@alu.ufc.br'
           },
           subject: 'test',
           text: 'message test'
