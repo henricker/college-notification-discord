@@ -1,7 +1,7 @@
 import { ImapSimpleOptions } from 'imap-simple';
 import imaps from 'imap-simple';
 import { FetchOptions } from 'imap';
-import { simpleParser } from 'mailparser';
+import { ParsedMail, simpleParser } from 'mailparser';
 import EventEmitter from 'events';
 
 export type MailType = {
@@ -45,49 +45,64 @@ export class FetchMailService extends EventEmitter {
     this.connectionImap?.openBox(boxName, this.handleOpenBox.bind(this));
   }
 
-  private async handleSearchBox(err: Error, messages: imaps.Message[]) {
+  private async handleSearchBox(err: Error | null, messages: imaps.Message[]) {
     if (err) {
-      console.error(err);
+      throw err;
     } else {
-      const totalMessages = messages.length;
-      let currentMessage = 0;
+      const messagesCounts = {
+        totalMessages: messages.length,
+        currentMessage: 0
+      };
+
       messages.forEach((item) => {
         const id = item.attributes.uid;
         const all = item.parts.find((part) => part.which === '');
         const idHeader = `Imap-Id: ${id}\r\n`;
 
         simpleParser(idHeader + all?.body, (err, mail) => {
-          if (err) {
-            throw err;
-          } else {
-            const address = mail.from?.value[0]?.address || '';
-            const name = mail.from?.value[0]?.name || '';
-            const subject = mail?.subject || '';
-            const body = mail?.text || '';
-
-            this.connectionImap?.addFlags(
-              id,
-              '\\Seen',
-              this.handleAddFlags.bind(this)
-            );
-
-            this.mails.push({
-              from: {
-                address,
-                name
-              },
-              subject,
-              text: body
-            });
-
-            currentMessage++;
-
-            if (currentMessage == totalMessages) {
-              this.emit('finish-read-messages', this.mails);
-            }
-          }
+          this.handleParseMail(err, mail, id, messagesCounts);
         });
       });
+    }
+  }
+
+  private async handleParseMail(
+    err: Error | null,
+    mail: ParsedMail,
+    id: number,
+    messagesCounts: {
+      currentMessage: number;
+      totalMessages: number;
+    }
+  ) {
+    if (err) {
+      throw err;
+    } else {
+      const address = mail?.from?.value[0]?.address || '';
+      const name = mail?.from?.value[0]?.name || '';
+      const subject = mail?.subject || '';
+      const body = mail?.text || '';
+
+      this.connectionImap?.addFlags(
+        id,
+        '\\Seen',
+        this.handleAddFlags.bind(this)
+      );
+
+      this.mails.push({
+        from: {
+          address,
+          name
+        },
+        subject,
+        text: body
+      });
+
+      messagesCounts.currentMessage++;
+
+      if (messagesCounts.currentMessage == messagesCounts.totalMessages) {
+        this.emit('finish-read-messages', this.mails);
+      }
     }
   }
 
