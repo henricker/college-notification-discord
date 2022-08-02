@@ -1,4 +1,4 @@
-import { FetchMailService } from '../../../src/infra/services/mail-listener.service';
+import { FetchMailService } from '../../../src/infra/services/fetch-mail.service';
 import { ParsedMail, Source } from 'mailparser';
 import { Message } from 'imap-simple';
 
