@@ -8,7 +8,9 @@
     "prettier-format": "prettier --config .prettierrc 'src/**/*.ts' --write",
     "lint": "eslint . --ext .ts",
     "start:dev": "ts-node-dev src/index.ts",
-    "test": "jest --watchAll --verbose"
+    "test": "jest --watchAll --verbose",
+    "build": "tsc",
+    "start:homolog": "node ./dist/src/index.js"
   },
   "devDependencies": {
     "@types/imap": "^0.8.35",
