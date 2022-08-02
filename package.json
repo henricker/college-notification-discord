@@ -9,6 +9,7 @@
     "lint": "eslint . --ext .ts",
     "start:dev": "ts-node-dev src/index.ts",
     "test": "jest --watchAll --verbose",
+    "test:ci": "jest --coverage",
     "build": "tsc",
     "start:homolog": "node ./dist/src/index.js"
   },
