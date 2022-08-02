@@ -15,4 +15,4 @@ services:
     networks:
       - notification-moodle-network
 networks:
-  crispim-network:
+  notification-moodle-network:

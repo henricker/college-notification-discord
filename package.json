@@ -4,17 +4,30 @@
   "main": "index.js",
   "author": "henricker <henriquevieira@alu.ufc.br>",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "prettier-format": "prettier --config .prettierrc 'src/**/*.ts' --write",
+    "lint": "eslint . --ext .ts",
+    "start:dev": "ts-node-dev src/index.ts",
+    "test": "jest --watchAll --verbose"
+  },
   "devDependencies": {
     "@types/imap": "^0.8.35",
+    "@types/imap-simple": "^4.2.5",
     "@types/jest": "^28.1.6",
     "@types/node": "^18.6.3",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
     "jest": "^28.1.3",
+    "prettier": "^2.7.1",
     "ts-jest": "^28.0.7",
     "ts-node-dev": "^2.0.0",
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "imap": "^0.8.19"
+    "@types/html-to-text": "^8.1.0",
+    "@types/mailparser": "^3.4.0",
+    "dotenv": "^16.0.1",
+    "imap-simple": "^5.1.0",
+    "mailparser": "^3.5.0"
   }
 }
