@@ -11,10 +11,14 @@ jobs:
       matrix:
         node-version: [14.15.x]
     steps:
-      - uses: actions/checkout@v3
+      - name: Clone repository
+        uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-      - run: npm install && npx jest --coverage
+      - name: Install dependencies
+        run: npm install
+      - name: Run tests
+        run: npm run test:ci
