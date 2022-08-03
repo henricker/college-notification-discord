@@ -10,4 +10,4 @@ dotenv.config({
 const mailWatcher = new MailWatcherService(new FetchMailService(imapConfig));
 
 //to each five minutes send request to find new mails
-mailWatcher.watch(5000 * 60);
+mailWatcher.listenEvents().watch(5000 * 60);
