@@ -13,7 +13,7 @@ export type MailType = {
   text: string;
 };
 
-export type FetchMailEvents = 'finish-read-messages';
+export type FetchMailEvents = 'finish-read-messages' | 'nothing-email-founded';
 
 export class FetchMailService extends EventEmitter {
   private imap: typeof imaps;
@@ -37,6 +37,10 @@ export class FetchMailService extends EventEmitter {
     return this;
   }
 
+  disconnect() {
+    this.connectionImap?.end();
+  }
+
   async openBox(boxName: string) {
     if (!this.connectionImap) {
       throw new Error('Connection not established');
@@ -54,15 +58,19 @@ export class FetchMailService extends EventEmitter {
         currentMessage: 0
       };
 
-      messages.forEach((item) => {
-        const id = item.attributes.uid;
-        const all = item.parts.find((part) => part.which === '');
-        const idHeader = `Imap-Id: ${id}\r\n`;
+      if (messages.length > 0) {
+        messages.forEach((item) => {
+          const id = item.attributes.uid;
+          const all = item.parts.find((part) => part.which === '');
+          const idHeader = `Imap-Id: ${id}\r\n`;
 
-        simpleParser(idHeader + all?.body, (err, mail) => {
-          this.handleParseMail(err, mail, id, messagesCounts);
+          simpleParser(idHeader + all?.body, (err, mail) =>
+            this.handleParseMail(err, mail, id, messagesCounts)
+          );
         });
-      });
+      } else {
+        this.emit('nothing-email-founded');
+      }
     }
   }
 
