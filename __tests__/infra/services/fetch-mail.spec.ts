@@ -23,7 +23,8 @@ jest.mock('imap-simple', () => {
       return {
         openBox: jest.fn((boxName, cb) => {}),
         addFlags: jest.fn((id, flags, cb) => {}),
-        search: jest.fn((searchCriteria, fetchOptions, cb) => {})
+        search: jest.fn((searchCriteria, fetchOptions, cb) => {}),
+        end: jest.fn(() => {})
       };
     })
   };
@@ -198,22 +199,74 @@ describe('# Fetch Mail (service)', () => {
       fetchMailService['handleSearchBox'](null, messages);
       expect(simpleParserMock).toHaveBeenCalledTimes(3);
     });
+
+    // it('Should call handleParseMail when callback execute on simpleParser', async () => {
+    //   const { fetchMailService } = generateServiceStub();
+
+    //   // const spyHandleParseMail = jest.spyOn(
+    //   //   fetchMailService,
+    //   //   'handleParseMail' as any
+    //   // );
+
+    //   const messages: Message[] = [
+    //     {
+    //       attributes: {
+    //         uid: 1,
+    //         date: new Date(),
+    //         flags: ['\\Unseen'],
+    //         size: 0
+    //       },
+    //       parts: [{ body: '', which: '', size: 1 }],
+    //       seqno: 1
+    //     }
+    //   ];
+
+    //   const mockMail: ParsedMail = {
+    //     text: 'message test',
+    //     subject: 'test',
+    //     from: {
+    //       value: [
+    //         {
+    //           name: 'Henrique Vieira',
+    //           address: 'henriquevieira@alu.ufc.br'
+    //         }
+    //       ],
+    //       html: '<h1>Henrique Vieira</h1>',
+    //       text: 'Henrique Vieira'
+    //     },
+    //     attachments: [],
+    //     headerLines: [],
+    //     headers: new Map(),
+    //     html: '<h1>Henrique Vieira</h1>'
+    //   };
+
+    //   const simpleParserMock = (await import('mailparser')).simpleParser as any;
+
+    //   await fetchMailService['handleSearchBox'](null, messages);
+
+    //   const callback = simpleParserMock.mock.calls[0][1];
+
+    //   await callback(null, mockMail);
+
+    //   // expect(spyHandleParseMail).toHaveBeenCalled();
+    // });
+
+    it('Should emit event "nothing-email-founded" if no email founded', async () => {
+      const { fetchMailService } = generateServiceStub();
+
+      const emitSpy = jest.spyOn(fetchMailService, 'emit');
+
+      const messages: Message[] = [];
+
+      await fetchMailService['handleSearchBox'](null, messages);
+
+      expect(emitSpy).toHaveBeenCalledWith('nothing-email-founded');
+    });
   });
 
   describe('handleParseMail (method)', () => {
     it('Should throw error if simple parser callback throws', async () => {
       const { fetchMailService } = generateServiceStub();
-
-      const mockMessage = {
-        attributes: {
-          uid: 1,
-          date: new Date(),
-          flags: ['\\Unseen'],
-          size: 0
-        },
-        parts: [{ body: '', which: '', size: 1 }],
-        seqno: 1
-      };
 
       expect(
         fetchMailService['handleParseMail'](
@@ -309,6 +362,22 @@ describe('# Fetch Mail (service)', () => {
           text: 'message test'
         }
       ]);
+    });
+  });
+
+  describe('disconnect (method)', () => {
+    it('Should call end method of imapConnection', async () => {
+      const { fetchMailService } = generateServiceStub();
+      await fetchMailService.connect();
+
+      const endSpy = jest.spyOn(
+        fetchMailService['connectionImap'] as any,
+        'end'
+      );
+
+      fetchMailService.disconnect();
+
+      expect(endSpy).toHaveBeenCalled();
     });
   });
 });
