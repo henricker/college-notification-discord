@@ -29,6 +29,7 @@
   "dependencies": {
     "@types/html-to-text": "^8.1.0",
     "@types/mailparser": "^3.4.0",
+    "discord.js": "^14.1.2",
     "dotenv": "^16.0.1",
     "imap-simple": "^5.1.0",
     "mailparser": "^3.5.0"
