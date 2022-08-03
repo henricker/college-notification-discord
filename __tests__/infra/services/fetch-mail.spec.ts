@@ -43,7 +43,7 @@ jest.mock('mailparser', () => {
 
 describe('# Fetch Mail (service)', () => {
   afterAll(() => {
-    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('connect (method)', () => {
