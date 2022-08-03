@@ -1,10 +1,15 @@
+import { discordConfig } from '../../infra/config/discord';
+import { DiscordService } from '../../infra/services/discord.service';
 import {
   FetchMailService,
   MailType
 } from '../../infra/services/fetch-mail.service';
 
 export class MailWatcherService {
-  constructor(private readonly fetchMailService: FetchMailService) {}
+  constructor(
+    private readonly fetchMailService: FetchMailService,
+    private readonly discordService: DiscordService
+  ) {}
 
   listenEvents() {
     this.fetchMailService.on(
@@ -25,7 +30,21 @@ export class MailWatcherService {
   }
 
   private async handleOnFinishReadMailsFounded(mails: MailType[]) {
+    mails.forEach(this.handleDiscordNotification.bind(this));
     this.fetchMailService.disconnect();
+  }
+
+  private async handleDiscordNotification(mail: MailType) {
+    const notification = `
+        📧 from: ${mail.from.address}, ${mail.from.name}
+        📢 subject: ${mail.subject},
+        📝 message: ${mail.text}
+      `;
+
+    await this.discordService.sendMessage(
+      discordConfig.channel_focused,
+      notification
+    );
   }
 
   private async handleOnNothingMailsFounded() {
