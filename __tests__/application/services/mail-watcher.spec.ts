@@ -12,7 +12,8 @@ const imapConfigMock = {
 
 function generateStubMailWatcher() {
   const mailWatcher = new MailWatcherService(
-    new FetchMailService(imapConfigMock)
+    new FetchMailService(imapConfigMock),
+    null as any
   );
   return {
     mailWatcher
