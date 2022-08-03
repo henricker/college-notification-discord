@@ -37,7 +37,7 @@ export class FetchMailService extends EventEmitter {
     return this;
   }
 
-  async disconnect() {
+  disconnect() {
     this.connectionImap?.end();
   }
 
@@ -64,9 +64,9 @@ export class FetchMailService extends EventEmitter {
           const all = item.parts.find((part) => part.which === '');
           const idHeader = `Imap-Id: ${id}\r\n`;
 
-          simpleParser(idHeader + all?.body, (err, mail) => {
-            this.handleParseMail(err, mail, id, messagesCounts);
-          });
+          simpleParser(idHeader + all?.body, (err, mail) =>
+            this.handleParseMail(err, mail, id, messagesCounts)
+          );
         });
       } else {
         this.emit('nothing-email-founded');
