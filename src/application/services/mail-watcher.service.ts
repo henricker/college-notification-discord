@@ -35,11 +35,7 @@ export class MailWatcherService {
   }
 
   private async handleDiscordNotification(mail: MailType) {
-    const notification = `
-        📧 from: ${mail.from.address}, ${mail.from.name}
-        📢 subject: ${mail.subject},
-        📝 message: ${mail.text}
-      `;
+    const notification = `📧 from: ${mail.from.address}, ${mail.from.name}\n📢 subject: ${mail.subject}\n📝 message: ${mail.text}`;
 
     await this.discordService.sendMessage(
       discordConfig.channel_focused,
