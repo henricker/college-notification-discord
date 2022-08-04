@@ -1,5 +1,6 @@
-import { ParsedMail, Source } from 'mailparser';
+import { Client as DiscordClient } from 'discord.js';
 import { MailWatcherService } from '../../../src/application/services/mail-watcher.service';
+import { DiscordService } from '../../../src/infra/services/discord.service';
 import { FetchMailService } from '../../../src/infra/services/fetch-mail.service';
 
 const imapConfigMock = {
@@ -11,9 +12,10 @@ const imapConfigMock = {
 };
 
 function generateStubMailWatcher() {
+  const discordServiceStub = new DiscordService({} as DiscordClient);
   const mailWatcher = new MailWatcherService(
     new FetchMailService(imapConfigMock),
-    null as any
+    discordServiceStub
   );
   return {
     mailWatcher
@@ -106,7 +108,7 @@ describe('# Mail Watcher (service)', () => {
     });
   });
 
-  describe('handleOnNothingMialsFounded (method)', () => {
+  describe('handleOnNothingMailsFounded (method)', () => {
     it('Should call disconnect method on fetchMailService', () => {
       const { mailWatcher } = generateStubMailWatcher();
 
@@ -197,6 +199,48 @@ describe('# Mail Watcher (service)', () => {
       await mailWatcher['handleWatchMails']();
 
       expect(openBoxSpy).toHaveBeenCalledWith('INBOX');
+    });
+  });
+
+  describe('handleDiscordNotification (method)', () => {
+    it('Should call sendMessage method of discordService', async () => {
+      const { mailWatcher } = generateStubMailWatcher();
+
+      const sendMessageSpy = jest
+        .spyOn(mailWatcher['discordService'] as any, 'sendMessage')
+        .mockImplementationOnce(() => {});
+
+      await mailWatcher['handleDiscordNotification']({
+        from: {
+          address: 'mail',
+          name: 'name'
+        },
+        subject: 'subject',
+        text: 'text'
+      });
+
+      expect(sendMessageSpy).toHaveBeenCalled();
+    });
+
+    it('Should throw if sendMessage method of discordService throws', async () => {
+      const { mailWatcher } = generateStubMailWatcher();
+
+      jest
+        .spyOn(mailWatcher['discordService'] as any, 'sendMessage')
+        .mockImplementationOnce(() => {
+          throw new Error('test');
+        });
+
+      expect(
+        mailWatcher['handleDiscordNotification']({
+          from: {
+            address: 'mail',
+            name: 'name'
+          },
+          subject: 'subject',
+          text: 'text'
+        })
+      ).rejects.toThrowError();
     });
   });
 });
