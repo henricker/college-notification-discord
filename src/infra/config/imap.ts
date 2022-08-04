@@ -1,6 +1,6 @@
 import imaps from 'imap-simple';
 
-export const config: imaps.ImapSimpleOptions = {
+export const imapConfig: imaps.ImapSimpleOptions = {
   imap: {
     user: (process.env.IMAP_USER as string) ?? '',
     password: (process.env.IMAP_PASSWORD as string) ?? '',
@@ -9,6 +9,7 @@ export const config: imaps.ImapSimpleOptions = {
     tls: Boolean(process.env.IMAP_TLS) ?? true,
     tlsOptions: {
       rejectUnauthorized: false
-    }
+    },
+    authTimeout: 10000
   }
 };
