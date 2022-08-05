@@ -4,11 +4,13 @@ import {
   FetchMailService,
   MailType
 } from '../../infra/services/fetch-mail.service';
+import { CheckFilesService } from '../../infra/util/check-files.service';
 
 export class MailWatcherService {
   constructor(
     private readonly fetchMailService: FetchMailService,
-    private readonly discordService: DiscordService
+    private readonly discordService: DiscordService,
+    private readonly checkFilesService: CheckFilesService
   ) {}
 
   listenEvents() {
@@ -30,7 +32,13 @@ export class MailWatcherService {
   }
 
   private async handleOnFinishReadMailsFounded(mails: MailType[]) {
-    mails.forEach(this.handleDiscordNotification.bind(this));
+    const mailsDomainUFC = mails.filter(
+      (v) =>
+        (v.from.address.includes('@ufc.br') ||
+          v.from.address.includes('@quixada.ufc.br')) &&
+        !this.checkFilesService.isHtml(v.text)
+    );
+    mailsDomainUFC.forEach(this.handleDiscordNotification.bind(this));
     this.fetchMailService.disconnect();
   }
 
