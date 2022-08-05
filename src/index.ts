@@ -19,5 +19,5 @@ import { DecodedService } from './infra/util/decode.service';
   );
 
   await discordService.connect();
-  await mailWatcher.listenEvents().watch(15000);
+  await mailWatcher.listenEvents().watch(5000 * 60);
 })();
