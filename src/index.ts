@@ -3,6 +3,8 @@ import { MailWatcherService } from './application/services/mail-watcher.service'
 import { imapConfig } from './infra/config/imap';
 import { DiscordService } from './infra/services/discord.service';
 import { FetchMailService } from './infra/services/fetch-mail.service';
+import { CheckFilesService } from './infra/util/check-files.service';
+import { DecodedService } from './infra/util/decode.service';
 
 (async () => {
   const discordService = new DiscordService(
@@ -11,8 +13,9 @@ import { FetchMailService } from './infra/services/fetch-mail.service';
     })
   );
   const mailWatcher = new MailWatcherService(
-    new FetchMailService(imapConfig),
-    discordService
+    new FetchMailService(imapConfig, new DecodedService()),
+    discordService,
+    new CheckFilesService()
   );
 
   await discordService.connect();
