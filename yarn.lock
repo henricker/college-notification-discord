@@ -752,6 +752,11 @@
   resolved "https://registry.yarnpkg.com/@types/prettier/-/prettier-2.6.4.tgz#ad899dad022bab6b5a9f0a0fe67c2f7a4a8950ed"
   integrity sha512-fOwvpvQYStpb/zHMx0Cauwywu9yLDmzWiiQBC7gJyq5tYLUXFZvDG7VK1B7WBxxjBJNKFOZ0zLoOQn8vmATbhw==
 
+"@types/quoted-printable@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@types/quoted-printable/-/quoted-printable-1.0.0.tgz#903f81f5d81698d361c176b5b52970cd2bc9868e"
+  integrity sha512-hgFjmHmgT5M8SvDVe+tMhiUb3xViwqkEAM/sTpWCpO0B2Z7RGAgwiQaxPcLVk4KLiZmqj7BMXZvaQQdX6uPM6A==
+
 "@types/stack-utils@^2.0.0":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@types/stack-utils/-/stack-utils-2.0.1.tgz#20f18294f797f2209b5f65c8e3b5c8e8261d127c"
@@ -2377,7 +2382,7 @@ prompts@^2.0.1:
     kleur "^3.0.3"
     sisteransi "^1.0.5"
 
-quoted-printable@^1.0.0:
+quoted-printable@^1.0.0, quoted-printable@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/quoted-printable/-/quoted-printable-1.0.1.tgz#9eebf5eb3d11eef022b264fd2d2b6b2bb3b84cc3"
   integrity sha512-cihC68OcGiQOjGiXuo5Jk6XHANTHl1K4JLk/xlEJRTIXfy19Sg6XzB95XonYgr+1rB88bCpr7WZE7D7AlZow4g==
