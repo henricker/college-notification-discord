@@ -1,5 +1,18 @@
 import { Client as DiscordClient } from 'discord.js';
+
 import { DiscordService } from '../../../src/infra/services/discord.service';
+
+const generateRandomString = (myLength: number) => {
+  const chars =
+    'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  const randomArray = Array.from(
+    { length: myLength },
+    (v, k) => chars[Math.floor(Math.random() * chars.length)]
+  );
+
+  const randomString = randomArray.join('');
+  return randomString;
+};
 
 function generateDiscordStub() {
   const clientDiscordStub = {
@@ -138,7 +151,7 @@ describe('# Discord (service)', () => {
       ).rejects.toThrow('Channel not found');
     });
 
-    it('Should call send method of channel', () => {
+    it('Should call send method of channel with message if message ha length less than 2000', () => {
       const { discordService, clientDiscordStub } = generateDiscordStub();
 
       const channel = {
@@ -152,6 +165,31 @@ describe('# Discord (service)', () => {
       discordService['sendMessage']('channelName', 'message');
 
       expect(sendSpy).toHaveBeenCalledTimes(1);
+      expect(sendSpy).toHaveBeenCalledWith('message');
+    });
+
+    it('Should call with attachment file if message has too long', () => {
+      const { discordService, clientDiscordStub } = generateDiscordStub();
+
+      const channel = {
+        send: jest.fn(() => {})
+      };
+
+      clientDiscordStub.channels.cache.find = jest.fn(() => channel) as any;
+
+      const sendSpy = jest.spyOn(channel, 'send');
+
+      discordService['sendMessage']('channelName', generateRandomString(2001));
+
+      expect(sendSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          files: expect.arrayContaining([
+            expect.objectContaining({
+              name: 'notification.txt'
+            })
+          ])
+        })
+      );
     });
   });
 });
