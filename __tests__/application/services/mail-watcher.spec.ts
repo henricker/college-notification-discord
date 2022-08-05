@@ -1,7 +1,12 @@
 import { Client as DiscordClient } from 'discord.js';
 import { MailWatcherService } from '../../../src/application/services/mail-watcher.service';
 import { DiscordService } from '../../../src/infra/services/discord.service';
-import { FetchMailService } from '../../../src/infra/services/fetch-mail.service';
+import {
+  FetchMailService,
+  MailType
+} from '../../../src/infra/services/fetch-mail.service';
+import { CheckFilesService } from '../../../src/infra/util/check-files.service';
+import { DecodedService } from '../../../src/infra/util/decode.service';
 
 const imapConfigMock = {
   imap: {
@@ -14,9 +19,11 @@ const imapConfigMock = {
 function generateStubMailWatcher() {
   const discordServiceStub = new DiscordService({} as DiscordClient);
   const mailWatcher = new MailWatcherService(
-    new FetchMailService(imapConfigMock),
-    discordServiceStub
+    new FetchMailService(imapConfigMock, new DecodedService()),
+    discordServiceStub,
+    new CheckFilesService()
   );
+
   return {
     mailWatcher
   };
@@ -146,7 +153,13 @@ describe('# Mail Watcher (service)', () => {
         'disconnect'
       );
 
-      mailWatcher['handleOnFinishReadMailsFounded']([]);
+      jest
+        .spyOn(mailWatcher, 'handleDiscordNotification' as any)
+        .mockImplementationOnce(() => {});
+
+      mailWatcher['handleOnFinishReadMailsFounded']([
+        { from: { address: 'henriquevieira@ufc.br' } } as MailType
+      ]);
 
       expect(disconnectSpy).toHaveBeenCalled();
     });
