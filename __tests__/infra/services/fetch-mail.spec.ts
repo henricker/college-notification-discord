@@ -1,6 +1,7 @@
 import { FetchMailService } from '../../../src/infra/services/fetch-mail.service';
 import mailParser, { ParsedMail, Source } from 'mailparser';
 import { Message } from 'imap-simple';
+import { DecodedService } from '../../../src/infra/util/decode.service';
 
 const imapConfigMock = {
   imap: {
@@ -11,7 +12,10 @@ const imapConfigMock = {
 };
 
 function generateServiceStub() {
-  const fetchMailService = new FetchMailService(imapConfigMock);
+  const fetchMailService = new FetchMailService(
+    imapConfigMock,
+    new DecodedService()
+  );
   return {
     fetchMailService
   };
@@ -27,6 +31,12 @@ jest.mock('imap-simple', () => {
         end: jest.fn(() => {})
       };
     })
+  };
+});
+
+jest.mock('quoted-printable', () => {
+  return {
+    decode: jest.fn(() => 'decoded')
   };
 });
 
@@ -198,6 +208,52 @@ describe('# Fetch Mail (service)', () => {
       const simpleParserMock = (await import('mailparser')).simpleParser;
       fetchMailService['handleSearchBox'](null, messages);
       expect(simpleParserMock).toHaveBeenCalledTimes(3);
+    });
+
+    it('Should call simple parser to get infos by email tree times to tree messages with correct values', async () => {
+      const { fetchMailService } = generateServiceStub();
+
+      const messages: Message[] = [
+        {
+          attributes: {
+            uid: 1,
+            date: new Date(),
+            flags: ['\\Unseen'],
+            size: 0
+          },
+          parts: [{ body: '', which: '', size: 1 }],
+          seqno: 1
+        },
+        {
+          attributes: {
+            uid: 1,
+            date: new Date(),
+            flags: ['\\Unseen'],
+            size: 0
+          },
+          parts: [{ body: '', which: '', size: 1 }],
+          seqno: 1
+        },
+        {
+          attributes: {
+            uid: 1,
+            date: new Date(),
+            flags: ['\\Unseen'],
+            size: 0
+          },
+          parts: [{ body: '', which: '', size: 1 }],
+          seqno: 1
+        }
+      ];
+
+      const decodedSpy = jest.spyOn(
+        fetchMailService['decodedService'],
+        'quotePrintableToUF8' as any
+      );
+
+      fetchMailService['handleSearchBox'](null, messages);
+
+      expect(decodedSpy).toHaveBeenCalled();
     });
 
     it('Should call handleParseMail when callback execute on simpleParser', async () => {
