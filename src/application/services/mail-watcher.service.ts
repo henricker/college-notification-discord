@@ -1,10 +1,17 @@
+import { discordConfig } from '../../infra/config/discord';
+import { DiscordService } from '../../infra/services/discord.service';
 import {
   FetchMailService,
   MailType
 } from '../../infra/services/fetch-mail.service';
+import { CheckFilesService } from '../../infra/util/check-files.service';
 
 export class MailWatcherService {
-  constructor(private readonly fetchMailService: FetchMailService) {}
+  constructor(
+    private readonly fetchMailService: FetchMailService,
+    private readonly discordService: DiscordService,
+    private readonly checkFilesService: CheckFilesService
+  ) {}
 
   listenEvents() {
     this.fetchMailService.on(
@@ -25,7 +32,23 @@ export class MailWatcherService {
   }
 
   private async handleOnFinishReadMailsFounded(mails: MailType[]) {
+    const mailsDomainUFC = mails.filter(
+      (v) =>
+        (v.from.address.includes('@ufc.br') ||
+          v.from.address.includes('@quixada.ufc.br')) &&
+        !this.checkFilesService.isHtml(v.text)
+    );
+    mailsDomainUFC.forEach(this.handleDiscordNotification.bind(this));
     this.fetchMailService.disconnect();
+  }
+
+  private async handleDiscordNotification(mail: MailType) {
+    const notification = `📧 from: ${mail.from.address}, ${mail.from.name}\n📢 subject: ${mail.subject}\n📝 message: ${mail.text}`;
+
+    await this.discordService.sendMessage(
+      discordConfig.channel_focused,
+      notification
+    );
   }
 
   private async handleOnNothingMailsFounded() {

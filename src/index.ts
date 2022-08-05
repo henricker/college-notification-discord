@@ -1,13 +1,23 @@
-import { config as imapConfig } from './infra/config/imap';
-import { FetchMailService } from './infra/services/fetch-mail.service';
-import dotenv from 'dotenv';
+import { Client, GatewayIntentBits } from 'discord.js';
 import { MailWatcherService } from './application/services/mail-watcher.service';
+import { imapConfig } from './infra/config/imap';
+import { DiscordService } from './infra/services/discord.service';
+import { FetchMailService } from './infra/services/fetch-mail.service';
+import { CheckFilesService } from './infra/util/check-files.service';
+import { DecodedService } from './infra/util/decode.service';
 
-dotenv.config({
-  path: '../../.env'
-});
+(async () => {
+  const discordService = new DiscordService(
+    new Client({
+      intents: GatewayIntentBits.Guilds
+    })
+  );
+  const mailWatcher = new MailWatcherService(
+    new FetchMailService(imapConfig, new DecodedService()),
+    discordService,
+    new CheckFilesService()
+  );
 
-const mailWatcher = new MailWatcherService(new FetchMailService(imapConfig));
-
-//to each five minutes send request to find new mails
-mailWatcher.listenEvents().watch(5000 * 60);
+  await discordService.connect();
+  await mailWatcher.listenEvents().watch(5000 * 60);
+})();

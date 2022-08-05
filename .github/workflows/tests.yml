@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [14.15.x]
+        node-version: [16.9.0]
     steps:
       - name: Clone repository
         uses: actions/checkout@v3
@@ -20,5 +20,7 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm install
+      - name: Building application
+        run: npm run build
       - name: Run tests
         run: npm run test:ci

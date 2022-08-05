@@ -3,6 +3,7 @@ import imaps from 'imap-simple';
 import { FetchOptions } from 'imap';
 import { ParsedMail, simpleParser } from 'mailparser';
 import EventEmitter from 'events';
+import { DecodedService } from '../util/decode.service';
 
 export type MailType = {
   from: {
@@ -22,6 +23,7 @@ export class FetchMailService extends EventEmitter {
 
   constructor(
     private readonly imapConfig: ImapSimpleOptions,
+    private readonly decodedService: DecodedService,
     eventEmitterOptions?: {
       captureRejections?: boolean | undefined;
     }
@@ -64,8 +66,16 @@ export class FetchMailService extends EventEmitter {
           const all = item.parts.find((part) => part.which === '');
           const idHeader = `Imap-Id: ${id}\r\n`;
 
+          const bodyParsed = this.decodedService.quotePrintableToUF8(all?.body);
+
+          const textMatch = bodyParsed.match(
+            /Content-Transfer-Encoding: quoted-printable(.+)------=_Part_/s
+          );
+
+          const text = textMatch?.[1].replace(/^[\r\n/]+/, '');
+
           simpleParser(idHeader + all?.body, (err, mail) =>
-            this.handleParseMail(err, mail, id, messagesCounts)
+            this.handleParseMail(err, { ...mail, text }, id, messagesCounts)
           );
         });
       } else {
