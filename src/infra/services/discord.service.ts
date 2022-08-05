@@ -1,4 +1,4 @@
-import { Client as ClientDiscord } from 'discord.js';
+import { Client as ClientDiscord, TextChannel } from 'discord.js';
 import { discordConfig } from '../config/discord';
 
 export class DiscordService {
@@ -23,12 +23,24 @@ export class DiscordService {
   ): Promise<void> {
     const channel = this.discord.channels.cache.find(
       (channel: any) => channel.toJSON().name === channelName
-    ) as any;
+    ) as TextChannel;
 
     if (!channel) {
       throw new Error('Channel not found');
     }
 
-    await channel.send(message);
+    const messageToSend =
+      message.length > 2000
+        ? {
+            files: [
+              {
+                name: 'notification.txt',
+                attachment: Buffer.from(message)
+              }
+            ]
+          }
+        : message;
+
+    await channel.send(messageToSend);
   }
 }
