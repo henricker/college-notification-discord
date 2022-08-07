@@ -1,5 +1,6 @@
 import { Client as ClientDiscord, TextChannel } from 'discord.js';
 import { discordConfig } from '../config/discord';
+import { CONSTANTS } from '../config/constants';
 
 export class DiscordService {
   constructor(private readonly discord: ClientDiscord) {}
@@ -30,7 +31,7 @@ export class DiscordService {
     }
 
     const messageToSend =
-      message.length > 2000
+      message.length > CONSTANTS.MESSAGE_LENGTH_LIMIT_DISCORD
         ? {
             files: [
               {
