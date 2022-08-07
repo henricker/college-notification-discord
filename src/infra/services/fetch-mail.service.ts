@@ -4,6 +4,7 @@ import { FetchOptions } from 'imap';
 import { ParsedMail, simpleParser } from 'mailparser';
 import EventEmitter from 'events';
 import { DecodedService } from '../util/decode.service';
+import { CONSTANTS } from '../config/constants';
 
 export type MailType = {
   from: {
@@ -134,9 +135,8 @@ export class FetchMailService extends EventEmitter {
     if (err) {
       throw err;
     }
-    const delay = 24 * 3600 * 1000;
     const yesterday = new Date();
-    yesterday.setTime(Date.now() - delay);
+    yesterday.setTime(Date.now() - CONSTANTS.FETCH_MAILS_FROM_LAST_HOURS);
 
     const searchCriteria = ['UNSEEN', ['SINCE', yesterday]];
     const fetchOptions: FetchOptions = {

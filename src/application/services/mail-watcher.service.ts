@@ -1,3 +1,4 @@
+import { CONSTANTS } from '../../infra/config/constants';
 import { discordConfig } from '../../infra/config/discord';
 import { DiscordService } from '../../infra/services/discord.service';
 import {
@@ -34,9 +35,9 @@ export class MailWatcherService {
   private async handleOnFinishReadMailsFounded(mails: MailType[]) {
     const mailsDomainUFC = mails.filter(
       (v) =>
-        (v.from.address.includes('@ufc.br') ||
-          v.from.address.includes('@quixada.ufc.br')) &&
-        !this.checkFilesService.isHtml(v.text)
+        CONSTANTS.DOMAIN_MAILS.some((domain) =>
+          v.from.address.includes(domain)
+        ) && !this.checkFilesService.isHtml(v.text)
     );
     mailsDomainUFC.forEach(this.handleDiscordNotification.bind(this));
     this.fetchMailService.disconnect();
