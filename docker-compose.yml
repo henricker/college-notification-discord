@@ -1,18 +1,18 @@
-version: "3"
+version: '3'
 
 services:
-  moodle_notification_service:
+  university_notification_service:
     build: .
-    container_name: moodle_notification_service
+    container_name: university_notification_service
     restart: on-failure
-    command: bash -c "yarn && yarn start:$MOODLE_SERVER_ARG"
+    command: bash -c "yarn && yarn start:$UNIVERSITY_SERVER_ARG"
     ports:
-      - ${MOODLE_SERVER_PORT}:${MOODLE_SERVER_PORT}
+      - ${UNIVERSITY_SERVER_PORT}:${UNIVERSITY_SERVER_PORT}
     env_file:
       - .env
     volumes:
       - ./:/usr/src/app
     networks:
-      - notification-moodle-network
+      - notification-university-network
 networks:
-  notification-moodle-network:
+  notification-university-network:
