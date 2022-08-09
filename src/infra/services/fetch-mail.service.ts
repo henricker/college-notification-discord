@@ -83,7 +83,7 @@ export class FetchMailService extends EventEmitter {
             mail.text = this.decodedService.removeHtml(mail.html);
           }
 
-          this.handleParseMail(null, mail, id, messagesCounts);
+          this.handleParseMail(mail, id, messagesCounts);
         } catch (err: any) {
           throw err;
         }
@@ -92,7 +92,6 @@ export class FetchMailService extends EventEmitter {
   }
 
   private async handleParseMail(
-    err: Error | null,
     mail: ParsedMail,
     id: number,
     messagesCounts: {
@@ -100,33 +99,25 @@ export class FetchMailService extends EventEmitter {
       totalMessages: number;
     }
   ) {
-    if (err) {
-      throw err;
-    } else {
-      const address = mail?.from?.value[0]?.address || '';
-      const name = mail?.from?.value[0]?.name || '';
-      const subject = mail?.subject || '';
-      const body = mail?.text || '';
+    const address = mail?.from?.value[0]?.address || '';
+    const name = mail?.from?.value[0]?.name || '';
+    const subject = mail?.subject || '';
+    const body = mail?.text || '';
 
-      this.connectionImap?.addFlags(
-        id,
-        '\\Seen',
-        this.handleAddFlags.bind(this)
-      );
+    this.connectionImap?.addFlags(id, '\\Seen', this.handleAddFlags.bind(this));
 
-      this.mails.push({
-        from: {
-          address,
-          name
-        },
-        subject,
-        text: body
-      });
-      messagesCounts.currentMessage++;
+    this.mails.push({
+      from: {
+        address,
+        name
+      },
+      subject,
+      text: body
+    });
+    messagesCounts.currentMessage++;
 
-      if (messagesCounts.currentMessage == messagesCounts.totalMessages) {
-        this.emit('finish-read-messages', this.mails);
-      }
+    if (messagesCounts.currentMessage == messagesCounts.totalMessages) {
+      this.emit('finish-read-messages', this.mails);
     }
   }
 
