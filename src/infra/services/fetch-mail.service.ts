@@ -61,32 +61,37 @@ export class FetchMailService extends EventEmitter {
         currentMessage: 0
       };
 
-      if (messages.length > 0) {
-        messages.forEach((item) => {
-          const id = item.attributes.uid;
-          const all = item.parts.find((part) => part.which === '');
-          const idHeader = `Imap-Id: ${id}\r\n`;
+      if (messages.length === 0) {
+        this.emit(CONSTANTS.EVENTS.NOTHING_EMAIL_FOUNDED);
+        return;
+      }
 
-          const bodyParsed = this.decodedService.quotePrintableToUF8(all?.body);
+      for await (const item of messages) {
+        const id = item.attributes.uid;
+        const all = item.parts.find((part) => part.which === '');
+        const idHeader = `Imap-Id: ${id}\r\n`;
 
-          const textMatch = bodyParsed.match(
-            /Content-Transfer-Encoding: quoted-printable(.+)------=_Part_/s
+        try {
+          const mail = await this.decodedService.parserEmail(
+            idHeader + all?.body,
+            {
+              encoding: 'utf8'
+            }
           );
 
-          const text = textMatch?.[1].replace(/^[\r\n/]+/, '');
+          if (!mail?.text && mail?.html) {
+            mail.text = this.decodedService.removeHtml(mail.html);
+          }
 
-          simpleParser(idHeader + all?.body, (err, mail) =>
-            this.handleParseMail(err, { ...mail, text }, id, messagesCounts)
-          );
-        });
-      } else {
-        this.emit('nothing-email-founded');
+          this.handleParseMail(mail, id, messagesCounts);
+        } catch (err: any) {
+          throw err;
+        }
       }
     }
   }
 
   private async handleParseMail(
-    err: Error | null,
     mail: ParsedMail,
     id: number,
     messagesCounts: {
@@ -94,34 +99,25 @@ export class FetchMailService extends EventEmitter {
       totalMessages: number;
     }
   ) {
-    if (err) {
-      throw err;
-    } else {
-      const address = mail?.from?.value[0]?.address || '';
-      const name = mail?.from?.value[0]?.name || '';
-      const subject = mail?.subject || '';
-      const body = mail?.text || '';
+    const address = mail?.from?.value[0]?.address || '';
+    const name = mail?.from?.value[0]?.name || '';
+    const subject = mail?.subject || '';
+    const body = mail?.text || '';
 
-      this.connectionImap?.addFlags(
-        id,
-        '\\Seen',
-        this.handleAddFlags.bind(this)
-      );
+    this.connectionImap?.addFlags(id, '\\Seen', this.handleAddFlags.bind(this));
 
-      this.mails.push({
-        from: {
-          address,
-          name
-        },
-        subject,
-        text: body
-      });
+    this.mails.push({
+      from: {
+        address,
+        name
+      },
+      subject,
+      text: body
+    });
+    messagesCounts.currentMessage++;
 
-      messagesCounts.currentMessage++;
-
-      if (messagesCounts.currentMessage == messagesCounts.totalMessages) {
-        this.emit('finish-read-messages', this.mails);
-      }
+    if (messagesCounts.currentMessage == messagesCounts.totalMessages) {
+      this.emit('finish-read-messages', this.mails);
     }
   }
 

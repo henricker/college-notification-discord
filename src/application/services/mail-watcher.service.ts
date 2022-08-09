@@ -5,23 +5,21 @@ import {
   FetchMailService,
   MailType
 } from '../../infra/services/fetch-mail.service';
-import { CheckFilesService } from '../../infra/util/check-files.service';
 
 export class MailWatcherService {
   constructor(
     private readonly fetchMailService: FetchMailService,
-    private readonly discordService: DiscordService,
-    private readonly checkFilesService: CheckFilesService
+    private readonly discordService: DiscordService
   ) {}
 
   listenEvents() {
     this.fetchMailService.on(
-      'finish-read-messages',
+      CONSTANTS.EVENTS.FINISH_READ_MESSAGES,
       this.handleOnFinishReadMailsFounded.bind(this)
     );
 
     this.fetchMailService.on(
-      'nothing-email-founded',
+      CONSTANTS.EVENTS.NOTHING_EMAIL_FOUNDED,
       this.handleOnNothingMailsFounded.bind(this)
     );
 
@@ -33,13 +31,14 @@ export class MailWatcherService {
   }
 
   private async handleOnFinishReadMailsFounded(mails: MailType[]) {
-    const mailsDomainUFC = mails.filter(
-      (v) =>
-        CONSTANTS.DOMAIN_MAILS.some((domain) =>
-          v.from.address.includes(domain)
-        ) && !this.checkFilesService.isHtml(v.text)
+    const mailsDomainUFC = mails.filter((v) =>
+      CONSTANTS.DOMAIN_MAILS.some((domain) => v.from.address.includes(domain))
     );
-    mailsDomainUFC.forEach(this.handleDiscordNotification.bind(this));
+
+    for await (const mail of mailsDomainUFC) {
+      await this.handleDiscordNotification(mail);
+    }
+
     this.fetchMailService.disconnect();
   }
 

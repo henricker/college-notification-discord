@@ -5,7 +5,7 @@ import {
   FetchMailService,
   MailType
 } from '../../../src/infra/services/fetch-mail.service';
-import { CheckFilesService } from '../../../src/infra/util/check-files.service';
+
 import { DecodedService } from '../../../src/infra/util/decode.service';
 
 const imapConfigMock = {
@@ -20,8 +20,7 @@ function generateStubMailWatcher() {
   const discordServiceStub = new DiscordService({} as DiscordClient);
   const mailWatcher = new MailWatcherService(
     new FetchMailService(imapConfigMock, new DecodedService()),
-    discordServiceStub,
-    new CheckFilesService()
+    discordServiceStub
   );
 
   return {
@@ -145,7 +144,7 @@ describe('# Mail Watcher (service)', () => {
   });
 
   describe('handleOnFinishReadMailsFounded (method)', () => {
-    it('Should call disconnect method on fetchMailService', () => {
+    it('Should call disconnect method on fetchMailService', async () => {
       const { mailWatcher } = generateStubMailWatcher();
 
       const disconnectSpy = jest.spyOn(
@@ -157,7 +156,7 @@ describe('# Mail Watcher (service)', () => {
         .spyOn(mailWatcher, 'handleDiscordNotification' as any)
         .mockImplementationOnce(() => {});
 
-      mailWatcher['handleOnFinishReadMailsFounded']([
+      await mailWatcher['handleOnFinishReadMailsFounded']([
         { from: { address: 'henriquevieira@ufc.br' } } as MailType
       ]);
 
