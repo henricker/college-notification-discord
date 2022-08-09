@@ -35,9 +35,8 @@ export class MailWatcherService {
       CONSTANTS.DOMAIN_MAILS.some((domain) => v.from.address.includes(domain))
     );
 
-    console.log(mailsDomainUFC);
     for await (const mail of mailsDomainUFC) {
-      //await this.handleDiscordNotification(mail);
+      await this.handleDiscordNotification(mail);
     }
 
     this.fetchMailService.disconnect();
