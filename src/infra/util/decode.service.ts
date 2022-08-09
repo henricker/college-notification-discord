@@ -8,14 +8,20 @@ import {
 } from 'mailparser';
 
 export class DecodedService {
+  private convert: typeof convert;
+  private simpleParser: typeof simpleParser;
+  constructor() {
+    this.convert = convert;
+    this.simpleParser = simpleParser;
+  }
   removeHtml(data: string) {
-    return convert(data);
+    return this.convert(data);
   }
 
   async parserEmail(
     source: Source,
     options?: MailParserOptions | undefined
   ): Promise<ParsedMail> {
-    return simpleParser(source, options);
+    return this.simpleParser(source, options);
   }
 }
