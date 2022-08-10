@@ -26,6 +26,10 @@
 
 - Because it is a simple application with two processes I decided to deploy on heroku
 
+## This is own bot! :D
+
+![](./docs/notification-bot.png)
+
 ## How to run?
 
 - First step: Clone this repository
@@ -34,7 +38,7 @@
   ```
 - Second: Create your bot in discord and add to your server.
 - Thrid: Create a .env file and add its variables.
-- Four: Crie o container com o docker
+- Four: Create a docker container.
   ```bash
   docker-compose up -d
   ```
